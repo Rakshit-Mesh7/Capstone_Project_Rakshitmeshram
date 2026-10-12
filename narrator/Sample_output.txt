@@ -1,0 +1,7 @@
+#Task 2 — generate_scr_narrative(findings: dict) -> dict
+output:
+Situation: Mamaearth has established a healthy revenue foundation, achieving a cleaned total revenue of 97358.3 INR. This performance reached a true peak in 2026-03, which generated 20318.9 INR in revenue.
+
+Complication: Despite this growth, return rates vary significantly by payment method, with COD orders experiencing a return rate of 44.4% compared to 14.7% for card and 18.9% for UPI. The highest risk segment is identified as COD orders in tier 2 cities, which suffer from a return rate of 54.5%. Additionally, data integrity requires attention as a duplicate reconciliation delta of 2501.9 INR was identified, and apparent revenue for 2026-01 was corrected from 29582.1 INR down to 11637.1 INR due to outliers.
+
+Resolution: The regional operations and finance teams should restrict or phase out Cash on Delivery (COD) options specifically for customers in tier 2 cities to mitigate the high 54.5% return rate. By incentivizing prepaid payment methods through targeted discounts or loyalty points, the company can align regional transaction behaviors with the lower-risk profiles observed in card and UPI channels. Implementing these conditions will protect margins and improve the accuracy of future revenue reporting.
