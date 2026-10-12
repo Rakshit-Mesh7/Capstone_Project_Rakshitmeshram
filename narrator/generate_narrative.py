@@ -1,5 +1,5 @@
 # ============================================================
-#generate_scr_narrative(findings: dict) -> dict
+#Task 2- generate_scr_narrative(findings: dict) -> dict
 # ============================================================
 import os
 import json
@@ -473,21 +473,3 @@ assert passed, "Task 5 failed: one or more required figures are missing."
 
 print("\nTask 5 numeric accuracy checklist passed!")
 print(f"Saved file: {output_path}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
