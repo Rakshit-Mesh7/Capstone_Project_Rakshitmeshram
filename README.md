@@ -1,185 +1,25 @@
-# Mamaearth Sales & Returns Analytics
+## Overview
 
-## Repository Structure
+This project analyzes Mamaearth's customer, product, and order data to evaluate revenue performance, identify return patterns, and generate actionable business insights. The project is divided into three parts:
 
-```text
-.
-├── README.md
-├── analysis/
-│   ├── clean_and_eda.py
-│   └── visualize.py
-├── data/
-│   ├── Orders.csv
-│   ├── customers.csv
-│   └── products.csv
-├── narrator/
-│   ├── Sample_output.txt
-│   ├── findings.json
-│   └── generate_narrative.py
-├── sql/
-│   ├── reports.sql
-│   ├── schema.sql
-│   └── seed_data.sql
-└── visualizations/
-    ├── monthly_revenue_trend.png
-    └── return_rate_by_payment.png
-```
+### Part 1 — SQL Relational Layer & Reporting
 
-## 1. Run the SQL pipeline
+A relational database is created using SQL with three tables: `customers`, `products`, and `orders`. The source data is loaded using seed scripts, and SQL reports are executed to analyze order data and establish the foundation for further analysis.
 
-Run all commands from the repository root.
+### Part 2 — Python/Pandas Data Wrangling & EDA
 
-### Create the database schema
+Python and pandas are used to clean and prepare the data for analysis. This includes removing duplicate orders, handling missing values, merging customer and product information with orders, calculating revenue, identifying quantity outliers, and exploring return rates by payment method and city tier. Matplotlib is used to visualize return patterns and monthly revenue trends. Verified findings are saved to `narrator/findings.json` for the next stage.
 
-```bash
-sqlite3 mamaearth.db < sql/schema.sql
-```
+### Part 3 — GenAI-Powered Insight Narrator
 
-### Load the seed data
+The narrative generator, `narrator/generate_narrative.py`, uses the verified findings in `narrator/findings.json` to produce a business-focused narrative for decision-makers. It supports Gemini API-based generation when an API key is available and an offline fallback when no key is provided.
 
-```bash
-sqlite3 mamaearth.db < sql/seed_data.sql
-```
+### Key Findings
 
-### Run the SQL reports
+- **Data quality:** Five duplicate order rows are removed, leaving 175 cleaned orders.
+- **Revenue reconciliation:** Cleaned revenue is ₹97,358.30, compared with raw revenue of ₹99,860.20.
+- **Payment-method risk:** COD has the highest return rate at 44.4%, compared with 14.7% for CARD and 18.9% for UPI.
+- **High-risk segment:** COD orders in Tier-2 cities have a return rate of 54.5%.
+- **Revenue trend:** After correcting for unusually large quantity orders, March 2026 is the peak revenue month at ₹20,318.90.
 
-```bash
-sqlite3 -header -column mamaearth.db < sql/reports.sql
-```
-
-### Verify the source record counts
-
-```bash
-sqlite3 mamaearth.db "
-SELECT 'customers' AS table_name, COUNT(*) AS row_count FROM customers
-UNION ALL
-SELECT 'products', COUNT(*) FROM products
-UNION ALL
-SELECT 'orders', COUNT(*) FROM orders;
-"
-```
-
-Expected counts: 45 customers, 16 products, and 180 original orders.
-
-## 2. Run the Python analysis and visualizations
-
-### Clean the data and perform EDA
-
-```bash
-python analysis/clean_and_eda.py
-```
-
-The script reads the CSV files from `data/`. It cleans the order data, removes duplicate orders, handles missing values, merges the order, customer, and product data, calculates revenue, flags quantity outliers, and analyzes returns and monthly revenue.
-
-**Task 5 of Part 2 writes the verified findings to `narrator/findings.json`.** Run this script successfully before generating the narrative.
-
-### Generate the visualizations
-
-```bash
-python analysis/visualize.py
-```
-
-The expected outputs are:
-
-- `visualizations/return_rate_by_payment.png`
-- `visualizations/monthly_revenue_trend.png`
-
-## 3. Generate the narrative
-
-The narrative generator uses `narrator/findings.json` as its input.
-
-### Option A — Run with a Gemini API key
-
-Install the dependencies if needed:
-
-```bash
-pip install pandas matplotlib google-genai
-```
-
-Set the API key as an environment variable.
-
-**Windows PowerShell:**
-
-```powershell
-$env:GEMINI_API_KEY="your-gemini-api-key"
-python narrator/generate_narrative.py
-```
-
-**macOS / Linux:**
-
-```bash
-export GEMINI_API_KEY="your-gemini-api-key"
-python narrator/generate_narrative.py
-```
-
-The script should read the key from `GEMINI_API_KEY` and use Gemini to generate the narrative. Do not hard-code your API key or commit it to the repository.
-
-### Option B — Run without a Gemini API key
-
-The project should also support an offline fallback that generates a narrative from the verified findings without calling Gemini.
-
-**Windows PowerShell:**
-
-```powershell
-Remove-Item Env:GEMINI_API_KEY -ErrorAction SilentlyContinue
-python narrator/generate_narrative.py
-```
-
-**macOS / Linux:**
-
-```bash
-unset GEMINI_API_KEY
-python narrator/generate_narrative.py
-```
-
-When no key is available, the script should use the offline fallback. This path should not require a Gemini API request.
-
-## 4. Verify the findings
-
-Inspect the generated findings file:
-
-**Windows Command Prompt:**
-
-```cmd
-type narrator\findings.json
-```
-
-**macOS / Linux:**
-
-```bash
-cat narrator/findings.json
-```
-
-The results should include the following verified figures:
-
-| Finding                                            | Expected value |
-| -------------------------------------------------- | -------------: |
-| Original orders                                    |            180 |
-| Cleaned orders                                     |            175 |
-| Raw revenue                                        |     ₹99,860.20 |
-| Cleaned revenue                                    |     ₹97,358.30 |
-| Revenue difference from duplicate removal          |      ₹2,501.90 |
-| COD return rate                                    |          44.4% |
-| CARD return rate                                   |          14.7% |
-| UPI return rate                                    |          18.9% |
-| Highest-risk segment                               |   COD + Tier-2 |
-| COD + Tier-2 return rate                           |          54.5% |
-| Corrected revenue peak                             |     March 2026 |
-| Corrected March revenue                            |     ₹20,318.90 |
-| Apparent January revenue before outlier correction |     ₹29,582.10 |
-| Corrected January revenue                          |     ₹11,637.10 |
-
-Five duplicate order rows are removed during cleaning. The January revenue peak is inflated by two unusually large quantity orders, `O0011` and `O0098`. After excluding the flagged outlier orders from the monthly comparison, March 2026 is the true revenue peak.
-
-## 5. Final reproduction checklist
-Final output:
-Numeric accuracy checklist:
-PASS — Cleaned total revenue (97,358.30)
-PASS — COD return rate (44.4%)
-PASS — COD + Tier-2 return rate (54.5%)
-PASS — Duplicate reconciliation delta (2,501.90)
-PASS — March peak revenue (20,318.90)
-
-Overall result: PASS
-
-Task 5 numeric accuracy checklist passed!
+The overall objective is to transform raw transactional data into reliable reports, clear visualizations, and actionable business recommendations.
